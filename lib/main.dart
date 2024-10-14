@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screen/login.dart';
 import 'screen/dashboard.dart';
+import 'screen/profile.dart';
 
 
 void main() {
@@ -13,7 +14,7 @@ class MyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: AnimalLandPage(),
+      home: Login(),
     );
   }
 }

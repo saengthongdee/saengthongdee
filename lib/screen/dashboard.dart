@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../API/createAPI.dart';
 import 'dart:convert';
+import 'profile.dart'; // Import the Profile page
+import '../widgets/animal_card.dart';
+import 'showdata.dart';
 
 class AnimalLandPage extends StatefulWidget {
   const AnimalLandPage({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class _AnimalLandPageState extends State<AnimalLandPage> {
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   late List<Map<String, dynamic>> animals = [];
+  List<Map<String, dynamic>> favoriteAnimals = []; // List of favorite animals
 
   @override
   void initState() {
@@ -96,10 +100,38 @@ class _AnimalLandPageState extends State<AnimalLandPage> {
               child: ListView.builder(
                 itemCount: filteredAnimals.length,
                 itemBuilder: (context, index) {
-                  return AnimalCard(
-                    name: filteredAnimals[index]['name'] ?? 'Unknown',
-                    imagePath: filteredAnimals[index]['imagePath'] ?? 'assets/placeholder.jpg',
+                  bool isFavorite = favoriteAnimals.contains(filteredAnimals[index]);
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10), // Add vertical padding
+                    leading: Container(
+                      width: 70, // Set width to make it square
+                      height: 70, // Set height to make it square
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8), // Optional: rounded corners
+                        image: DecorationImage(
+                          image: AssetImage(filteredAnimals[index]['imagePath'] ?? 'assets/placeholder.jpg'),
+                          fit: BoxFit.cover, // Cover the container while maintaining aspect ratio
+                        ),
+                      ),
+                    ),
+                    title: Text(filteredAnimals[index]['name'] ?? 'Unknown'),
+                    trailing: IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.star : Icons.star_border,
+                        color: isFavorite ? Colors.yellow : Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if (isFavorite) {
+                            favoriteAnimals.remove(filteredAnimals[index]);
+                          } else {
+                            favoriteAnimals.add(filteredAnimals[index]);
+                          }
+                        });
+                      },
+                    ),
                     onTap: () {
+                      // Navigate to ShowData page
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -107,7 +139,7 @@ class _AnimalLandPageState extends State<AnimalLandPage> {
                             name: filteredAnimals[index]['name'] ?? 'Unknown',
                             description: filteredAnimals[index]['description'] ?? 'No description available',
                             location: filteredAnimals[index]['location'] ?? 'Unknown location',
-                            behavior: filteredAnimals[index]['behavior'] ?? 'No behavior information available', 
+                            behavior: filteredAnimals[index]['behavior'] ?? 'No behavior information available',
                             imagePath: filteredAnimals[index]['imagePath'] ?? 'assets/placeholder.jpg',
                           ),
                         ),
@@ -121,172 +153,57 @@ class _AnimalLandPageState extends State<AnimalLandPage> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-  child: Container(
-    height: 70,  // Adjust the height for proper spacing
-    child: Center(
-      child: Container(
-        width: 60,  // Set the width and height to make it circular
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.green,  // Set the background color
-          shape: BoxShape.circle,  // Makes the container circular
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.home),
-          color: Colors.white,
-          iconSize: 30,  // Adjust icon size if needed
-          onPressed: () {
-            // Handle button press
-          },
-        ),
-      ),
-    ),
-  ),
-),
-
-    );
-  }
-}
-
-class ShowData extends StatelessWidget {
-  final String name;
-  final String description;
-  final String location;
-  final String behavior;  
-  final String imagePath;
-
-  const ShowData({
-    Key? key,
-    required this.name,
-    required this.description,
-    required this.location,
-    required this.behavior,  
-    required this.imagePath,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(name),
-        centerTitle: true,
-        backgroundColor: Colors.teal,
-      ),
-      body: SingleChildScrollView(
         child: Container(
-          color: Colors.grey[100],
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          height: 70, // Adjust the height for proper spacing
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround, // Distribute space evenly
             children: [
-              Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.asset(
-                      imagePath,
-                      height: 250,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+              // Home button
+              Container(
+                width: 60, // Set the width and height to make it circular
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.green, // Set the background color
+                  shape: BoxShape.circle, // Makes the container circular
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.home),
+                  color: Colors.white,
+                  iconSize: 30, // Adjust icon size if needed
+                  onPressed: () {
+                    // Handle Home button press
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AnimalLandPage()),
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: 25),
-              _buildInfoSection('Description:', description),
-              const SizedBox(height: 20),
-              _buildInfoSection('Location:', location),
-              const SizedBox(height: 20),
-              _buildInfoSection('Behavior:', behavior),
+              // Profile button
+              Container(
+                width: 60, // Set the width and height to make it circular
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.blue, // Set the background color for the Profile button
+                  shape: BoxShape.circle, // Makes the container circular
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.person),
+                  color: Colors.white,
+                  iconSize: 30, // Adjust icon size if needed
+                  onPressed: () {
+                    // Navigate to the Profile page with favoriteAnimals
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(favoriteAnimals: favoriteAnimals), // Send the list of favorite animals
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoSection(String title, String content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              content,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class AnimalCard extends StatelessWidget {
-  final String name;
-  final String imagePath;
-  final VoidCallback onTap;
-
-  const AnimalCard({
-    Key? key,
-    required this.name,
-    required this.imagePath,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 10.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        elevation: 4,
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-              child: AspectRatio(
-                aspectRatio: 2.75 / 1.75,
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
